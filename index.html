@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portofolio</title>
+
+    <!-- Replace favicon.png with your actual favicon file -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="shortcut icon" href="favicon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* =====================================================
+           CSS CUSTOM PROPERTIES
+           Change these to retheme the entire site.
+           Each variable is named for its purpose, not its color.
+           ===================================================== */
+        :root {
+            /* Backgrounds — layered from darkest to lightest surface */
+            --bg-base:        #06051a;
+            --bg-surface:     #090718;
+            --bg-card:        #0e0b1e;
+            --bg-card-hover:  #140f28;
+
+            /* Primary accent — bold pink from Bold Hues palette */
+            --accent:         #c4225e;
+            --accent-bright:  #e0397f;
+            --accent-dim:     rgba(196,34,94,0.12);
+            --accent-glow:    rgba(196,34,94,0.35);
+
+            /* Secondary accent — teal from Bold Hues palette */
+            --cyan:           #1c8fa0;
+            --cyan-dim:       rgba(28,143,160,0.10);
+
+            /* Text hierarchy */
+            --text-primary:   #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted:     #475569;
+
+            /* Borders */
+            --border:         rgba(196,34,94,0.12);
+            --border-bright:  rgba(196,34,94,0.30);
+
+            /* Border radius scale */
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+
+            /* Layout */
+            --nav-height:    70px;
+            --section-gap:  120px;
+            --container-max: 1120px;
+
+            /* Typography */
+            --font-sans:    'DM Sans', sans-serif;
+            --font-display: 'Cormorant Garamond', serif;
+            --font-mono:    'Fira Code', monospace;
+
+            /* Motion */
+            --transition:      0.22s ease;
+            --transition-slow: 0.5s ease;
+        }
+
+        /* =====================================================
+           RESET AND BASE
+           ===================================================== */
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: var(--nav-height);
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-base);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        ::selection { background: var(--accent-dim); color: var(--accent-bright); }
+
+        img { max-width:100%; display:block; }
+        a   { text-decoration:none; color:inherit; }
+        ul  { list-style:none; }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar            { width: 5px; }
+        ::-webkit-scrollbar-track      { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb      { background: var(--accent-dim); border-radius:3px; }
+        ::-webkit-scrollbar-thumb:hover{ background: var(--accent); }
+
+        /* =====================================================
+           LAYOUT UTILITIES
+           ===================================================== */
+        .container {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            padding: 0 28px;
+        }
+
+        section { padding: var(--section-gap) 0; }
+
+        /* Section label chip — removed per design decision */
+        .section-label {
+            display: none;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accent);
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .section-label::before {
+            content:'';
+            width: 28px; height: 1px;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(28px, 4vw, 44px);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 14px;
+        }
+
+        .section-subtitle {
+            font-size: 17px;
+            color: var(--text-secondary);
+            max-width: 580px;
+            margin-bottom: 60px;
+            line-height: 1.75;
+        }
+
+        /* =====================================================
+           SCROLL FADE-IN ANIMATION
+           Elements get this class added by IntersectionObserver
+           ===================================================== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.65s ease, transform 0.65s ease;
+        }
+        .fade-in.visible { opacity:1; transform:translateY(0); }
+
+        /* Staggered delay for grid children */
+        .fade-in:nth-child(2) { transition-delay: 0.08s; }
+        .fade-in:nth-child(3) { transition-delay: 0.16s; }
+        .fade-in:nth-child(4) { transition-delay: 0.24s; }
+        .fade-in:nth-child(5) { transition-delay: 0.32s; }
+        .fade-in:nth-child(6) { transition-delay: 0.40s; }
+
+        /* =====================================================
+           NAVBAR
+           ===================================================== */
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            height: var(--nav-height);
+            display: flex;
+            align-items: center;
+            transition: background var(--transition), border-color var(--transition);
+        }
+        .nav.scrolled {
+            background: rgba(5,5,26,0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .nav-logo img {
+            height: 36px;
+            width: auto;
+            display: block;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .nav-links a {
+            font-size: 13.5px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: capitalize;
+            transition: color var(--transition);
+            position: relative;
+        }
+        .nav-links a::after {
+            content:'';
+            position:absolute;
+            bottom:-4px; left:0;
+            width:0; height:1px;
+            background: var(--accent);
+            transition: width var(--transition);
+        }
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-links a:hover::after { width:100%; }
+
+        .nav-cta {
+            padding: 8px 20px;
+            border: 1px solid var(--border-bright);
+            border-radius: var(--radius-sm);
+            color: var(--accent-bright) !important;
+            transition: background var(--transition) !important;
+        }
+        .nav-cta:hover { background: var(--accent-dim) !important; }
+        .nav-cta::after { display:none !important; }
+
+        /* =====================================================
+           HERO SECTION
+           ===================================================== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: var(--nav-height);
+        }
+
+        /* Ambient glow orbs in the background */
+        .hero-orb {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .hero-orb-1 {
+            width: 640px; height: 640px;
+            background: radial-gradient(circle, rgba(129,140,248,0.16) 0%, transparent 70%);
+            top: -120px; right: -80px;
+            animation: orb-drift 9s ease-in-out infinite;
+        }
+        .hero-orb-2 {
+            width: 480px; height: 480px;
+            background: radial-gradient(circle, rgba(34,211,238,0.10) 0%, transparent 70%);
+            bottom: 40px; left: 5%;
+            animation: orb-drift 12s ease-in-out infinite reverse;
+        }
+        @keyframes orb-drift {
+            0%,100% { transform: translate(0,0) scale(1); }
+            40%     { transform: translate(24px,-24px) scale(1.08); }
+            70%     { transform: translate(-12px,16px) scale(0.94); }
+        }
+
+        /* Dot grid overlay */
+        .hero-dots {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(129,140,248,0.11) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(ellipse at 60% 40%, black 30%, transparent 75%);
+            -webkit-mask-image: radial-gradient(ellipse at 60% 40%, black 30%, transparent 75%);
+            z-index: 0;
+        }
+
+        .hero-content { position:relative; z-index:1; }
+
+        .hero-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--cyan);
+            letter-spacing: 0.12em;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .hero-eyebrow::before { content:''; width:36px; height:1px; background:var(--cyan); }
+
+        /* Large gradient name */
+        .hero-name {
+            font-family: var(--font-display);
+            font-size: clamp(52px, 9vw, 96px);
+            font-weight: 700;
+            line-height: 1.0;
+            margin-bottom: 20px;
+            background: linear-gradient(130deg, var(--text-primary) 0%, var(--accent-bright) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-tagline {
+            font-size: clamp(17px, 2.5vw, 24px);
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+            height: 34px;
+        }
+        .hero-tagline #typed-text { color: var(--accent-bright); font-weight:500; }
+
+        /* Blinking cursor after typed text */
+        .cursor {
+            display: inline-block;
+            width: 2px; height: 1em;
+            background: var(--accent);
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+        .hero-bio {
+            font-size: 17px;
+            color: var(--text-secondary);
+            max-width: 540px;
+            margin-bottom: 44px;
+            line-height: 1.8;
+        }
+
+        .hero-actions { display:flex; gap:16px; flex-wrap:wrap; }
+
+        /* Primary CTA button */
+        .btn-primary {
+            padding: 14px 32px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 0 24px var(--accent-glow);
+            transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px var(--accent-glow);
+            background: var(--accent-bright);
+        }
+
+        /* Ghost/outline button */
+        .btn-ghost {
+            padding: 14px 32px;
+            border: 1px solid var(--border-bright);
+            color: var(--text-primary);
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-size: 15px;
+            transition: background var(--transition), border-color var(--transition);
+        }
+        .btn-ghost:hover { background: var(--accent-dim); border-color: var(--accent); }
+
+        /* Animated scroll indicator */
+        .hero-scroll {
+            position: absolute;
+            bottom: 36px; left:50%;
+            transform: translateX(-50%);
+            display: flex; flex-direction:column; align-items:center; gap:8px;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-family: var(--font-mono);
+            letter-spacing: 0.1em;
+            animation: nudge 3s ease-in-out infinite;
+        }
+        .scroll-line { width:1px; height:48px; background:linear-gradient(to bottom,transparent,var(--accent)); }
+        @keyframes nudge {
+            0%,100%{ transform:translateX(-50%) translateY(0); }
+            50%    { transform:translateX(-50%) translateY(8px); }
+        }
+
+        /* =====================================================
+           STATS BAR
+           ===================================================== */
+        .stats-bar {
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-surface);
+            padding: 40px 0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 16px;
+            text-align: center;
+        }
+        .stat-item { padding: 20px; }
+        .stat-number {
+            font-family: var(--font-display);
+            font-size: 38px;
+            font-weight: 700;
+            color: var(--accent-bright);
+            display: block;
+        }
+        .stat-label {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            margin-top: 4px;
+        }
+
+        /* =====================================================
+           ABOUT SECTION
+           ===================================================== */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: start;
+        }
+
+        .about-text p {
+            color: var(--text-secondary);
+            line-height: 1.9;
+            margin-bottom: 18px;
+            font-size: 16px;
+        }
+        .about-text strong { color: var(--text-primary); font-weight:600; }
+
+        .about-links { display:flex; gap:12px; flex-wrap:wrap; margin-top:32px; }
+
+        .icon-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition);
+        }
+        .icon-link:hover { border-color:var(--accent); color:var(--accent-bright); background:var(--accent-dim); }
+
+        .about-right { display:flex; flex-direction:column; gap:14px; }
+
+        /* Interest cards on the right side of About */
+        .interest-card {
+            padding: 18px 22px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--bg-card);
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            transition: border-color var(--transition), transform var(--transition);
+        }
+        .interest-card:hover { border-color:var(--accent); transform:translateX(4px); }
+
+        .interest-icon {
+            font-size: 22px;
+            width: 44px; height: 44px;
+            display: flex; align-items:center; justify-content:center;
+            background: var(--accent-dim);
+            border-radius: var(--radius-sm);
+            flex-shrink: 0;
+        }
+        .interest-content h4 { font-size:15px; font-weight:600; color:var(--text-primary); margin-bottom:4px; }
+        .interest-content p  { font-size:13px; color:var(--text-muted); line-height:1.5; }
+
+        /* =====================================================
+           PROJECTS SECTION
+           ===================================================== */
+        .projects-grid { display:grid; gap:28px; }
+
+        .project-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: border-color var(--transition), transform var(--transition-slow);
+        }
+        .project-card:hover { border-color:var(--border-bright); transform:translateY(-3px); }
+
+        .project-header {
+            padding: 32px 36px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 28px;
+            align-items: start;
+        }
+
+        /* Domain/type badge on each project */
+        .project-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent-dim);
+            border: 1px solid rgba(129,140,248,0.22);
+            border-radius: 100px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--accent-bright);
+            margin-bottom: 14px;
+            letter-spacing: 0.06em;
+        }
+        .project-title {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+        .project-desc {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.75;
+            margin-bottom: 20px;
+        }
+        .project-stack { display:flex; flex-wrap:wrap; gap:8px; }
+
+        /* Tech tags in the stack row */
+        .tech-tag {
+            padding: 4px 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+        }
+
+        .project-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        .project-links { display:flex; gap:10px; }
+
+        .project-link {
+            width: 38px; height: 38px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            display: flex; align-items:center; justify-content:center;
+            color: var(--text-muted);
+            transition: all var(--transition);
+        }
+        .project-link:hover { border-color:var(--accent); color:var(--accent-bright); background:var(--accent-dim); }
+
+        /* Button to expand technical writeup */
+        .writeup-toggle {
+            font-size: 12px;
+            font-family: var(--font-mono);
+            text-transform: capitalize;
+            color: var(--accent);
+            cursor: pointer;
+            border: none;
+            background: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color var(--transition);
+            padding: 0;
+            white-space: nowrap;
+            letter-spacing: 0.05em;
+        }
+        .writeup-toggle:hover { color: var(--accent-bright); }
+        .writeup-arrow { transition: transform var(--transition); display:inline-block; }
+        .writeup-toggle.open .writeup-arrow { transform: rotate(180deg); }
+
+        /* Expandable writeup panel */
+        .project-writeup {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.55s ease;
+            border-top: 0px solid var(--border);
+        }
+        .project-writeup.open {
+            max-height: 1600px;
+            border-top-width: 1px;
+        }
+
+        .writeup-content {
+            padding: 32px 36px;
+            background: rgba(0,0,0,0.18);
+        }
+        .writeup-content h4 {
+            font-family: var(--font-display);
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--accent-bright);
+            margin-bottom: 10px;
+            margin-top: 28px;
+        }
+        .writeup-content h4:first-child { margin-top:0; }
+        .writeup-content p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.85;
+            margin-bottom: 10px;
+        }
+        .writeup-content ul { list-style:disc; padding-left:20px; }
+        .writeup-content li {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.75;
+            margin-bottom: 6px;
+        }
+
+        /* Metric boxes inside writeup */
+        .writeup-metrics {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 14px;
+            margin: 20px 0;
+        }
+        .metric-box {
+            padding: 16px;
+            background: var(--accent-dim);
+            border: 1px solid rgba(129,140,248,0.18);
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+        .metric-box .val {
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--accent-bright);
+        }
+        .metric-box .key {
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* =====================================================
+           SKILLS SECTION
+           ===================================================== */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 22px;
+        }
+        .skill-category {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 26px;
+            transition: border-color var(--transition), transform var(--transition);
+        }
+        .skill-category:hover { border-color:var(--border-bright); transform:translateY(-2px); }
+
+        .skill-cat-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .skill-cat-icon {
+            font-size: 20px;
+            width:40px; height:40px;
+            display:flex; align-items:center; justify-content:center;
+            background: var(--accent-dim);
+            border-radius: var(--radius-sm);
+        }
+        .skill-cat-name { font-family:var(--font-display); font-weight:600; font-size:16px; }
+
+        .skill-tags { display:flex; flex-wrap:wrap; gap:8px; }
+        .skill-tag {
+            padding: 6px 13px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            transition: all var(--transition);
+            cursor: default;
+        }
+        .skill-tag:hover { background:var(--accent-dim); border-color:rgba(129,140,248,0.28); color:var(--accent-bright); }
+
+        /* =====================================================
+           TIMELINE (Experience and Education)
+           ===================================================== */
+        .timeline { position:relative; padding-left:44px; }
+        .timeline::before {
+            content:'';
+            position:absolute;
+            left:10px; top:0; bottom:0;
+            width:1px;
+            background: linear-gradient(to bottom, var(--accent), transparent);
+        }
+
+        .timeline-item {
+            position:relative;
+            margin-bottom: 44px;
+            padding: 28px 30px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            transition: border-color var(--transition);
+        }
+        .timeline-item:hover { border-color:var(--border-bright); }
+
+        /* Glowing dot on the timeline line */
+        .timeline-item::before {
+            content:'';
+            position:absolute;
+            left: -39px; top: 32px;
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .timeline-item-header {
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            flex-wrap:wrap;
+            gap:12px;
+            margin-bottom:6px;
+        }
+        .timeline-role { font-family:var(--font-display); font-weight:600; font-size:18px; }
+        .timeline-period {
+            font-family:var(--font-mono);
+            font-size:11px;
+            color:var(--accent);
+            background:var(--accent-dim);
+            padding:4px 12px;
+            border-radius:100px;
+        }
+        .timeline-org { font-size:14px; color:var(--accent-bright); font-weight:500; margin-bottom:14px; }
+
+        .timeline-points li {
+            font-size:14px;
+            color:var(--text-secondary);
+            line-height:1.75;
+            padding-left:16px;
+            position:relative;
+            margin-bottom:6px;
+        }
+        .timeline-points li::before {
+            content:'▸';
+            position:absolute;
+            left:0;
+            color:var(--accent);
+            font-size:11px;
+        }
+
+        /* =====================================================
+           COURSES SECTION
+           ===================================================== */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 18px;
+        }
+        .course-card {
+            padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            position:relative;
+            overflow:hidden;
+            transition: border-color var(--transition), transform var(--transition);
+        }
+        /* Accent line that slides in on hover */
+        .course-card::before {
+            content:'';
+            position:absolute;
+            top:0; left:0; right:0;
+            height:2px;
+            background: linear-gradient(90deg, var(--accent), var(--cyan));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform var(--transition);
+        }
+        .course-card:hover { border-color:var(--border-bright); transform:translateY(-3px); }
+        .course-card:hover::before { transform:scaleX(1); }
+
+        .course-provider {
+            font-family:var(--font-mono);
+            font-size:11px;
+            color:var(--accent);
+            letter-spacing:0.1em;
+            text-transform:uppercase;
+            margin-bottom:8px;
+        }
+        .course-name { font-weight:600; font-size:15px; color:var(--text-primary); margin-bottom:6px; line-height:1.4; }
+        .course-meta { font-size:13px; color:var(--text-muted); }
+        .course-badge {
+            display:inline-flex;
+            align-items:center;
+            gap:5px;
+            margin-top:14px;
+            padding:4px 10px;
+            border-radius:100px;
+            font-size:11px;
+            font-family:var(--font-mono);
+        }
+        .course-badge.done {
+            background: rgba(34,211,238,0.08);
+            border: 1px solid rgba(34,211,238,0.2);
+            color: var(--cyan);
+        }
+        .course-badge.wip {
+            background: rgba(251,191,36,0.08);
+            border: 1px solid rgba(251,191,36,0.2);
+            color: #fbbf24;
+        }
+
+        /* =====================================================
+           CONTACT SECTION
+           ===================================================== */
+        .contact-wrapper {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:64px;
+            align-items:start;
+        }
+        .contact-left p {
+            font-size:16px;
+            color:var(--text-secondary);
+            line-height:1.85;
+            margin-bottom:32px;
+        }
+        .contact-left strong { color:var(--text-primary); }
+
+        .contact-links { display:flex; flex-direction:column; gap:12px; }
+
+        .contact-link-item {
+            display:flex;
+            align-items:center;
+            gap:16px;
+            padding:16px 20px;
+            border:1px solid var(--border);
+            border-radius:var(--radius-md);
+            color:var(--text-secondary);
+            transition:all var(--transition);
+        }
+        .contact-link-item:hover {
+            border-color:var(--accent);
+            color:var(--accent-bright);
+            background:var(--accent-dim);
+            transform:translateX(4px);
+        }
+        .contact-link-icon {
+            width:38px; height:38px;
+            background:var(--accent-dim);
+            border-radius:var(--radius-sm);
+            display:flex; align-items:center; justify-content:center;
+            font-size:16px;
+            flex-shrink:0;
+        }
+        .contact-link-label { font-size:11px; font-family:var(--font-mono); color:var(--text-muted); }
+        .contact-link-value { font-size:14px; font-weight:500; color:var(--text-primary); margin-top:2px; }
+
+        /* Contact form */
+        .contact-form { display:flex; flex-direction:column; gap:16px; }
+        .form-group  { display:flex; flex-direction:column; gap:6px; }
+        .form-group label {
+            font-size:11px;
+            font-family:var(--font-mono);
+            color:var(--text-muted);
+            letter-spacing:0.1em;
+            text-transform:uppercase;
+        }
+        .form-group input,
+        .form-group textarea {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            outline: none;
+            transition: border-color var(--transition);
+            resize: vertical;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus { border-color:var(--accent); }
+        .form-group textarea { min-height:120px; }
+
+        .form-submit {
+            padding:14px 28px;
+            background:var(--accent);
+            color:#fff;
+            border:none;
+            border-radius:var(--radius-sm);
+            font-weight:600;
+            font-size:15px;
+            cursor:pointer;
+            transition:all var(--transition);
+            font-family:var(--font-sans);
+        }
+        .form-submit:hover {
+            background:var(--accent-bright);
+            transform:translateY(-2px);
+            box-shadow:0 8px 24px var(--accent-glow);
+        }
+
+        /* =====================================================
+           FOOTER
+           ===================================================== */
+        footer {
+            padding: 36px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        footer p { font-size:13px; color:var(--text-muted); font-family:var(--font-mono); }
+        footer span { color:var(--accent); }
+
+        /* =====================================================
+           RESPONSIVE BREAKPOINTS
+           ===================================================== */
+        @media (max-width: 900px) {
+            :root { --section-gap: 80px; }
+            .about-grid,
+            .contact-wrapper { grid-template-columns:1fr; gap:44px; }
+            .skills-grid,
+            .courses-grid { grid-template-columns:repeat(2,1fr); }
+            .stats-grid    { grid-template-columns:repeat(2,1fr); }
+        }
+        @media (max-width: 600px) {
+            .nav-links { display:none; }
+            .skills-grid,
+            .courses-grid { grid-template-columns:1fr; }
+            .project-header { grid-template-columns:1fr; }
+            .project-actions { align-items:flex-start; flex-direction:row; flex-wrap:wrap; }
+            .writeup-metrics { grid-template-columns:1fr; }
+            .hero-name { font-size:48px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===================== NAVBAR ===================== -->
+<nav class="nav" id="navbar">
+    <div class="container nav-inner">
+        <div class="nav-logo">
+            <!-- Drop your logo image into the Portofolio folder and update the src below -->
+            <img src="favicon.png" alt="Viraj Sanghavi" style="height:38px;width:38px;object-fit:contain;">
+        </div>
+        <ul class="nav-links">
+            <li><a href="#about">about</a></li>
+            <li><a href="#projects">projects</a></li>
+            <li><a href="#skills">skills</a></li>
+            <li><a href="#experience">experience</a></li>
+            <li><a href="#courses">courses</a></li>
+            <li><a href="#contact" class="nav-cta">contact</a></li>
+        </ul>
+    </div>
+</nav>
+
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" id="home">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-dots"></div>
+
+    <div class="container hero-content">
+        <h1 class="hero-name">Viraj Sanghavi</h1>
+        <p class="hero-tagline"><span id="typed-text"></span><span class="cursor"></span></p>
+        <p class="hero-bio">
+            I build ML systems that learn from real-world data across three domains:
+            Finance, Logistics, and Speech. Currently exploring the edges of what
+            intelligent systems can do when designed with rigor.
+        </p>
+        <div class="hero-actions">
+            <a href="#projects" class="btn-primary">View My Work</a>
+            <a href="#contact"  class="btn-ghost">Get In Touch</a>
+            <a href="Resume (4th June).pdf" download class="btn-ghost">Download Resume</a>
+        </div>
+    </div>
+
+</section>
+
+
+
+<!-- ===================== ABOUT ===================== -->
+<section id="about">
+    <div class="container">
+        <div class="fade-in">
+            <h2 class="section-title">Who I am</h2>
+        </div>
+        <div class="about-grid">
+            <div class="about-text fade-in">
+                <p>
+                    I'm <strong>Viraj Sanghavi</strong>, a third-year Computer Engineering student at
+                    DJ Sanghavi College of Engineering (graduating 2028), building ML systems
+                    that operate at the intersection of Finance, Logistics, and Speech AI.
+                </p>
+                <p>
+                    My work spans <strong>algorithmic trading platforms</strong> with multi-model ensembles,
+                    <strong>adaptive speech recognition</strong> pipelines with closed-loop remediation,
+                    and <strong>healthcare supply chain analytics</strong> using global trade data. Each project
+                    goes end-to-end: from data collection and feature engineering through to deployment.
+                </p>
+                <p>
+                    I care about ML that is <strong>rigorous, explainable, and production-ready</strong>.
+                    No shortcuts on data leakage, no skipping evaluation, no hand-wavy results.
+                </p>
+                <div class="about-links">
+                    <a href="https://github.com/VirajSanghavi007" target="_blank" class="icon-link">
+                        <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        GitHub
+                    </a>
+                    <a href="https://linkedin.com/in/virajsanghavi" target="_blank" class="icon-link">
+                        <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        LinkedIn
+                    </a>
+                    <a href="https://kaggle.com/virajsanghavi" target="_blank" class="icon-link">
+                        <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M18.825 23.859c-.022.092-.117.141-.281.141h-3.139c-.187 0-.351-.082-.492-.248l-5.178-6.589-1.448 1.374v5.111c0 .235-.117.352-.351.352H5.505c-.236 0-.354-.117-.354-.352V.353c0-.233.118-.353.354-.353h2.431c.234 0 .351.12.351.353v14.343l6.203-6.272c.165-.165.33-.246.495-.246h3.239c.144 0 .236.06.285.18.046.149.034.255-.036.315l-6.555 6.344 6.836 8.507c.095.104.117.208.07.334z"/></svg>
+                        Kaggle
+                    </a>
+                    <a href="Resume (4th June).pdf" download class="icon-link">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        Resume
+                    </a>
+                </div>
+            </div>
+            <div class="about-right fade-in">
+                <div class="interest-card">
+                    <div class="interest-icon">📈</div>
+                    <div class="interest-content">
+                        <h4>Algorithmic Trading</h4>
+                        <p>Multi-model ensembles, regime detection, and walk-forward backtesting with real risk controls.</p>
+                    </div>
+                </div>
+                <div class="interest-card">
+                    <div class="interest-icon">🎙️</div>
+                    <div class="interest-content">
+                        <h4>Speech AI</h4>
+                        <p>Adaptive ASR, phoneme-level diagnostics, noise fingerprinting, and closed-loop LoRA fine-tuning.</p>
+                    </div>
+                </div>
+                <div class="interest-card">
+                    <div class="interest-icon">🚢</div>
+                    <div class="interest-content">
+                        <h4>Supply Chain Analytics</h4>
+                        <p>Healthcare logistics, global trade data, and pharmaceutical supply chain optimization.</p>
+                    </div>
+                </div>
+                <div class="interest-card">
+                    <div class="interest-icon">🔬</div>
+                    <div class="interest-content">
+                        <h4>Research</h4>
+                        <p>Implementing SOTA papers, reproducing benchmarks, and building on published methods.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===================== PROJECTS ===================== -->
+<section id="projects" style="background:var(--bg-surface)">
+    <div class="container">
+        <div class="fade-in">
+            <h2 class="section-title">What I have built</h2>
+            <p class="section-subtitle">
+                Each project covers the full stack: data collection, feature engineering,
+                model training, evaluation, and deployment.
+            </p>
+        </div>
+
+        <div class="projects-grid">
+
+            <!-- PROJECT 1: AlgoTrade-X -->
+            <div class="project-card fade-in">
+                <div class="project-header">
+                    <div>
+                        <span class="project-tag">Finance · Algorithmic Trading</span>
+                        <h3 class="project-title">AlgoTrade-X</h3>
+                        <p class="project-desc">
+                            A production-grade algorithmic trading platform that runs a 7-model ensemble
+                            (classical ML, deep learning, and reinforcement learning) over equities, ETFs,
+                            and crypto. Built with 100% free data sources and deploys end-to-end via Docker.
+                        </p>
+                        <div class="project-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">PyTorch</span>
+                            <span class="tech-tag">XGBoost</span>
+                            <span class="tech-tag">LightGBM</span>
+                            <span class="tech-tag">HuggingFace</span>
+                            <span class="tech-tag">FastAPI</span>
+                            <span class="tech-tag">Streamlit</span>
+                            <span class="tech-tag">Docker</span>
+                            <span class="tech-tag">Redis</span>
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <div class="project-links">
+                            <a href="https://github.com/VirajSanghavi007" target="_blank" class="project-link" title="GitHub">
+                                <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            </a>
+                        </div>
+                        <button class="writeup-toggle" onclick="toggleWriteup(this)">
+                            read writeup <span class="writeup-arrow">▾</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="project-writeup">
+                    <div class="writeup-content">
+                        <h4>Problem</h4>
+                        <p>
+                            Retail algorithmic trading tools are either black boxes or academic toys. The goal was
+                            to build something with institutional-grade risk controls, real explainability, and
+                            a multi-model ensemble that adapts to different market regimes.
+                        </p>
+
+                        <h4>Architecture</h4>
+                        <p>
+                            Seven models form the ensemble: XGBoost and LightGBM (with Optuna tuning), Random Forest,
+                            LSTM with temporal attention (3 layers, sequence length 60), Temporal Convolutional Network
+                            (dilated causal, receptive field 765 bars), PatchTST Transformer, and a PPO reinforcement
+                            learning agent trained with curriculum learning. A Ridge meta-learner combines their outputs.
+                        </p>
+                        <ul>
+                            <li>HMM regime detector (3 states: bull / bear / sideways) routes signals to per-regime ensemble weights</li>
+                            <li>80+ engineered features: momentum, volatility, volume, microstructure, sentiment (FinBERT on headlines), fundamentals</li>
+                            <li>Walk-forward backtesting: 2-year training window, 3-month test window, no lookahead bias guaranteed by test suite</li>
+                            <li>Data from free APIs: yfinance, Finnhub, FRED, Binance, NewsAPI, SEC EDGAR, Alpaca paper trading</li>
+                            <li>SHAP explainability on every prediction. Every trade decision logged with full feature snapshot</li>
+                        </ul>
+
+                        <h4>Risk Controls</h4>
+                        <p>
+                            Seven circuit breakers (portfolio drawdown, daily loss, single position loss, VIX spike,
+                            volatility spike, correlation crisis, low model confidence). Position sizing uses
+                            half-Kelly scaled by volatility targeting and ensemble confidence.
+                        </p>
+
+                        <h4>Results</h4>
+                        <div class="writeup-metrics">
+                            <div class="metric-box"><div class="val">7</div><div class="key">Model Ensemble</div></div>
+                            <div class="metric-box"><div class="val">80+</div><div class="key">Features</div></div>
+                            <div class="metric-box"><div class="val">7</div><div class="key">Circuit Breakers</div></div>
+                        </div>
+
+                        <h4>Key Learnings</h4>
+                        <p>
+                            Walk-forward validation is non-negotiable. A strategy that looks good on a single
+                            train/test split almost always falls apart under WFO. Regime-aware weighting
+                            made a bigger difference than adding more models to the ensemble.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROJECT 2: ADAPT-Synthetix -->
+            <div class="project-card fade-in">
+                <div class="project-header">
+                    <div>
+                        <span class="project-tag">Speech AI · ASR</span>
+                        <h3 class="project-title">ADAPT-Synthetix</h3>
+                        <p class="project-desc">
+                            A research-grade adaptive speech pipeline that goes beyond transcription. It diagnoses
+                            WHY ASR fails at the phoneme level, fingerprints acoustic noise, detects model drift,
+                            and closes the loop with targeted LoRA fine-tuning — all in a single system.
+                        </p>
+                        <div class="project-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Wav2Vec2</span>
+                            <span class="tech-tag">PyTorch</span>
+                            <span class="tech-tag">AdaLoRA</span>
+                            <span class="tech-tag">Bark TTS</span>
+                            <span class="tech-tag">FastAPI</span>
+                            <span class="tech-tag">React</span>
+                            <span class="tech-tag">PostgreSQL</span>
+                            <span class="tech-tag">Docker</span>
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <div class="project-links">
+                            <a href="https://github.com/VirajSanghavi007/ADAPT-Synthetix" target="_blank" class="project-link" title="GitHub">
+                                <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            </a>
+                            <a href="https://github.com/VirajSanghavi007/ADAPT-Synthetix" target="_blank" class="project-link" title="Live on Render">
+                                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+                            </a>
+                        </div>
+                        <button class="writeup-toggle" onclick="toggleWriteup(this)">
+                            read writeup <span class="writeup-arrow">▾</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="project-writeup">
+                    <div class="writeup-content">
+                        <h4>Problem</h4>
+                        <p>
+                            Standard ASR systems return a transcript and stop. They don't tell you which phonemes
+                            are causing errors, what the acoustic environment is doing to the signal, or how the
+                            model is drifting over time. ADAPT-Synthetix was designed to close all three gaps.
+                        </p>
+
+                        <h4>Architecture</h4>
+                        <p>
+                            Built on Facebook's Wav2Vec2 with a multi-layer diagnostic engine sitting on top.
+                            Every transcription runs through CTC confidence scoring, phoneme error rate computation,
+                            reference alignment, and noise fingerprinting before entering a confidence-weighted
+                            remediation priority queue.
+                        </p>
+                        <ul>
+                            <li>8-feature acoustic noise fingerprinting: spectral centroid, bandwidth, rolloff, ZCR, RMS, MFCC variance, tempo, harmonic ratio. Classifies into clean / traffic / crowd / machinery / indoor.</li>
+                            <li>Phoneme-level drift monitoring using CUSUM and MMD. Triggers fine-tuning alert when 5+ phonemes enter high-risk state across a 20-utterance window.</li>
+                            <li>Domain vocabulary injection for medical and emergency terms — these errors are escalated in the priority queue regardless of overall CER.</li>
+                            <li>AdaLoRA (adaptive rank) fine-tuning with layer freezing and 10% experience replay. Implements HDMoLE LoRA-MoE routing across multiple expert adapters.</li>
+                            <li>Dual frontend: vanilla JS terminal UI (mic, waveform, file upload) and a React 18 dashboard with analytics, phoneme explorer, and model hub pages.</li>
+                        </ul>
+
+                        <h4>Research Papers Implemented</h4>
+                        <p>
+                            Rumberg et al. Interspeech 2023 (CTC token uncertainty), Ernez et al. PMLR 2023
+                            (conformal prediction priority queue), Zhang et al. ICLR 2023 (AdaLoRA),
+                            Mu et al. ICASSP 2025 (HDMoLE), Guo et al. ICML 2017 (ECE calibration).
+                        </p>
+
+                        <h4>Results</h4>
+                        <div class="writeup-metrics">
+                            <div class="metric-box"><div class="val">8</div><div class="key">Noise Classes</div></div>
+                            <div class="metric-box"><div class="val">2620</div><div class="key">Benchmark Samples</div></div>
+                            <div class="metric-box"><div class="val">5+</div><div class="key">Papers Implemented</div></div>
+                        </div>
+
+                        <h4>Key Learnings</h4>
+                        <p>
+                            Phoneme-level granularity reveals failure modes that word-level CER completely masks.
+                            The drift detection was the hardest part: CUSUM is sensitive to window size in ways
+                            that are not obvious until you see it fail on real-world noisy audio.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROJECT 3: FreightMind -->
+            <div class="project-card fade-in">
+                <div class="project-header">
+                    <div>
+                        <span class="project-tag">Logistics · Supply Chain</span>
+                        <h3 class="project-title">FreightMind</h3>
+                        <p class="project-desc">
+                            A healthcare supply chain analytics platform focused on global pharmaceutical logistics.
+                            Uses GHSC formulary data, EXIM trade records, and country-level trade volumes to
+                            surface patterns and optimization opportunities in the flow of essential medicines.
+                        </p>
+                        <div class="project-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Pandas</span>
+                            <span class="tech-tag">NumPy</span>
+                            <span class="tech-tag">PDF Parsing</span>
+                            <span class="tech-tag">Trade APIs</span>
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <div class="project-links">
+                            <a href="https://github.com/VirajSanghavi007" target="_blank" class="project-link" title="GitHub">
+                                <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            </a>
+                        </div>
+                        <button class="writeup-toggle" onclick="toggleWriteup(this)">
+                            read writeup <span class="writeup-arrow">▾</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="project-writeup">
+                    <div class="writeup-content">
+                        <h4>Problem</h4>
+                        <p>
+                            Global healthcare supply chains for essential medicines are opaque. Procurement decisions,
+                            trade policy changes, and logistical bottlenecks affect whether medicines reach patients.
+                            There is no unified analytical view across GHSC formulary data, EXIM trade regulations,
+                            and country-level import/export volumes.
+                        </p>
+
+                        <h4>Data Sources</h4>
+                        <ul>
+                            <li>GHSC (Global Health Supply Chain) Essential Medicines Formulary and HIV Rapid Diagnostic Tests catalogue</li>
+                            <li>GHSC-PSM FY24 Annual Report covering procurement and supply chain performance</li>
+                            <li>Foreign Trade (Development and Regulation) Act 1992 and 2010 amendment</li>
+                            <li>Country-wise total trade volumes (EIDB dataset) and EXIM policy documents</li>
+                        </ul>
+
+                        <h4>Approach</h4>
+                        <p>
+                            Parsing and structuring unstructured PDF and Excel sources into a unified trade
+                            and formulary dataset. Planned ML components include demand forecasting for
+                            essential medicines and trade route optimization under regulatory constraints.
+                        </p>
+
+                        <h4>Status</h4>
+                        <div class="writeup-metrics">
+                            <div class="metric-box"><div class="val">5+</div><div class="key">Data Sources</div></div>
+                            <div class="metric-box"><div class="val">40+</div><div class="key">Countries</div></div>
+                            <div class="metric-box"><div class="val">WIP</div><div class="key">Stage</div></div>
+                        </div>
+
+                        <h4>Next Steps</h4>
+                        <p>
+                            Completing the ETL pipeline, building the demand forecasting model, and deploying
+                            an analytics dashboard. This is an active research project.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROJECT 4: AML Intelligence Platform (hackathon) -->
+            <div class="project-card fade-in">
+                <div class="project-header">
+                    <div>
+                        <span class="project-tag">Finance · Fraud Detection · iDEA 2.0</span>
+                        <h3 class="project-title">AML Intelligence Platform</h3>
+                        <p class="project-desc">
+                            A graph-native Anti-Money Laundering detection system built for Union Bank of India
+                            at iDEA 2.0 (Team Zeta). Ingests 500K synthetic transactions, constructs a directed
+                            account graph, and classifies 8 AML typologies using structural graph analysis and
+                            a Random Forest classifier with 16 graph-level features.
+                        </p>
+                        <div class="project-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">NetworkX</span>
+                            <span class="tech-tag">scikit-learn</span>
+                            <span class="tech-tag">FastAPI</span>
+                            <span class="tech-tag">Cytoscape.js</span>
+                            <span class="tech-tag">Chart.js</span>
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <div class="project-links">
+                            <a href="https://github.com/VirajSanghavi007/IdeaHackathon" target="_blank" class="project-link" title="GitHub">
+                                <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            </a>
+                            <a href="https://ideahackathon-1.onrender.com" target="_blank" class="project-link" title="Live Demo">
+                                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+                            </a>
+                        </div>
+                        <button class="writeup-toggle" onclick="toggleWriteup(this)">
+                            read writeup <span class="writeup-arrow">▾</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="project-writeup">
+                    <div class="writeup-content">
+                        <h4>Problem</h4>
+                        <p>
+                            Union Bank's fraud investigators manually reconstruct transaction trails, a process
+                            taking 3 to 5 days per case. Coordinated money laundering schemes (circular routing,
+                            layering, smurfing) escape detection before funds exit the banking system.
+                        </p>
+
+                        <h4>Detection Pipeline</h4>
+                        <p>
+                            Dual-mode detection: labelled mode classifies known suspicious transactions into
+                            8 AML structural typologies using graph analysis. Unlabelled mode scores every
+                            account against 7 behavioural signals and flags accounts triggering 2 or more.
+                        </p>
+                        <ul>
+                            <li>8 AML typologies: Cycle, Fan-Out, Fan-In, Scatter-Gather, Gather-Scatter, Bipartite, Stack, Random Chain</li>
+                            <li>7 behavioural signals: rapid fan-out, round-trip, structuring below $10K thresholds, layering velocity, dormant activation, currency mismatch, smurfing</li>
+                            <li>Random Forest classifier (200 trees, balanced class weights) trained on 16 graph-level features</li>
+                            <li>Cytoscape.js interactive graph visualization for investigator review</li>
+                            <li>Built in 48 hours with Team Zeta at K.J. Somaiya iDEA 2.0</li>
+                        </ul>
+
+                        <h4>Results (IBM Synthetic Test Set)</h4>
+                        <div class="writeup-metrics">
+                            <div class="metric-box"><div class="val">0.67</div><div class="key">F1 Score</div></div>
+                            <div class="metric-box"><div class="val">0.83</div><div class="key">Precision</div></div>
+                            <div class="metric-box"><div class="val">0.86</div><div class="key">Accuracy</div></div>
+                        </div>
+
+                        <h4>Key Learnings</h4>
+                        <p>
+                            Graph structure alone carries more signal than transaction amounts for AML detection.
+                            Recall (0.56) is the hard problem: catching all laundering without drowning investigators
+                            in false positives requires more data and more typologies than a 48-hour hackathon allows.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ===================== SKILLS ===================== -->
+<section id="skills">
+    <div class="container">
+        <div class="fade-in">
+            <h2 class="section-title">My toolkit</h2>
+            <p class="section-subtitle">Tools and frameworks I use to build, train, and ship across three domains.</p>
+        </div>
+        <div class="skills-grid">
+            <div class="skill-category fade-in">
+                <div class="skill-cat-header">
+                    <div class="skill-cat-icon">🐍</div>
+                    <div class="skill-cat-name">Languages</div>
+                </div>
+                <div class="skill-tags">
+                    <span class="skill-tag">Python</span>
+                    <span class="skill-tag">SQL</span>
+                    <span class="skill-tag">JavaScript</span>
+                    <span class="skill-tag">Bash</span>
+                </div>
+            </div>
+            <div class="skill-category fade-in">
+                <div class="skill-cat-header">
+                    <div class="skill-cat-icon">🧪</div>
+                    <div class="skill-cat-name">ML and Deep Learning</div>
+                </div>
+                <div class="skill-tags">
+                    <span class="skill-tag">PyTorch</span>
+                    <span class="skill-tag">HuggingFace</span>
+                    <span class="skill-tag">scikit-learn</span>
+                    <span class="skill-tag">XGBoost</span>
+                    <span class="skill-tag">LightGBM</span>
+                    <span class="skill-tag">Stable-Baselines3</span>
+                    <span class="skill-tag">Optuna</span>
+                </div>
+            </div>
+            <div class="skill-category fade-in">
+                <div class="skill-cat-header">
+                    <div class="skill-cat-icon">🎙️</div>
+                    <div class="skill-cat-name">Speech AI</div>
+                </div>
+                <div class="skill-tags">
+                    <span class="skill-tag">Wav2Vec2</span>
+                    <span class="skill-tag">Bark TTS</span>
+                    <span class="skill-tag">AdaLoRA</span>
+                    <span class="skill-tag">CTC Decoding</span>
+                    <span class="skill-tag">Phoneme Alignment</span>
+                    <span class="skill-tag">librosa</span>
+                </div>
+            </div>
+            <div class="skill-category fade-in">
+                <div class="skill-cat-header">
+                    <div class="skill-cat-icon">📦</div>
+                    <div class="skill-cat-name">Data and MLOps</div>
+                </div>
+                <div class="skill-tags">
+                    <span class="skill-tag">Pandas</span>
+                    <span class="skill-tag">NumPy</span>
+                    <span class="skill-tag">NetworkX</span>
+                    <span class="skill-tag">CCXT</span>
+                    <span class="skill-tag">yfinance</span>
+                    <span class="skill-tag">SHAP</span>
+                </div>
+            </div>
+            <div class="skill-category fade-in">
+                <div class="skill-cat-header">
+                    <div class="skill-cat-icon">🏗️</div>
+                    <div class="skill-cat-name">Infrastructure</div>
+                </div>
+                <div class="skill-tags">
+                    <span class="skill-tag">Docker</span>
+                    <span class="skill-tag">FastAPI</span>
+                    <span class="skill-tag">Streamlit</span>
+                    <span class="skill-tag">React</span>
+                    <span class="skill-tag">Redis</span>
+                    <span class="skill-tag">Git</span>
+                    <span class="skill-tag">Render</span>
+                </div>
+            </div>
+            <div class="skill-category fade-in">
+                <div class="skill-cat-header">
+                    <div class="skill-cat-icon">🗄️</div>
+                    <div class="skill-cat-name">Databases</div>
+                </div>
+                <div class="skill-tags">
+                    <span class="skill-tag">PostgreSQL</span>
+                    <span class="skill-tag">SQLite</span>
+                    <span class="skill-tag">Parquet</span>
+                    <span class="skill-tag">Redis</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===================== EXPERIENCE AND EDUCATION ===================== -->
+<section id="experience" style="background:var(--bg-surface)">
+    <div class="container">
+        <div class="fade-in">
+            <h2 class="section-title">My journey</h2>
+        </div>
+        <div class="timeline">
+
+            <!-- Add your internship/work experience here -->
+            <div class="timeline-item fade-in">
+                <div class="timeline-item-header">
+                    <div class="timeline-role">Developer Intern</div>
+                    <div class="timeline-period">Jun 2026 – Aug 2026</div>
+                </div>
+                <div class="timeline-org">ITAakash Strategic Software Pvt. Ltd. — Development</div>
+                <ul class="timeline-points">
+                    <li>What you did and the measurable impact it had</li>
+                    <li>Technologies used and problems solved</li>
+                    <li>Key contribution or project you led or contributed to</li>
+                </ul>
+            </div>
+
+            <div class="timeline-item fade-in">
+                <div class="timeline-item-header">
+                    <div class="timeline-role">B.E. Computer Engineering</div>
+                    <div class="timeline-period">2024 – 2028</div>
+                </div>
+                <div class="timeline-org">DJ Sanghavi College of Engineering</div>
+                <ul class="timeline-points">
+                    <li>Currently in third year, expected graduation 2028</li>
+                    <li>Relevant coursework: Data Structures, Algorithms, Statistics, Machine Learning</li>
+                    <li>Building domain expertise across Finance, Logistics, and Speech AI through independent projects</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ===================== COURSES ===================== -->
+<section id="courses">
+    <div class="container">
+        <div class="fade-in">
+            <h2 class="section-title">Continuous learning</h2>
+            <p class="section-subtitle">Self-directed learning alongside engineering. Replace these with your actual completed courses.</p>
+        </div>
+        <div class="courses-grid">
+
+            <div class="course-card fade-in">
+                <div class="course-provider">Provider</div>
+                <div class="course-name">Course Name Here</div>
+                <div class="course-meta">Instructor · Duration</div>
+                <div class="course-badge done">Completed</div>
+            </div>
+
+            <div class="course-card fade-in">
+                <div class="course-provider">Provider</div>
+                <div class="course-name">Course Name Here</div>
+                <div class="course-meta">Instructor · Duration</div>
+                <div class="course-badge done">Completed</div>
+            </div>
+
+            <div class="course-card fade-in">
+                <div class="course-provider">Provider</div>
+                <div class="course-name">Course Name Here</div>
+                <div class="course-meta">Instructor · Duration</div>
+                <div class="course-badge done">Completed</div>
+            </div>
+
+            <div class="course-card fade-in">
+                <div class="course-provider">Provider</div>
+                <div class="course-name">Course Name Here</div>
+                <div class="course-meta">Instructor · Duration</div>
+                <div class="course-badge done">Completed</div>
+            </div>
+
+            <div class="course-card fade-in">
+                <div class="course-provider">Provider</div>
+                <div class="course-name">Course Name Here</div>
+                <div class="course-meta">Instructor · Duration</div>
+                <div class="course-badge done">Completed</div>
+            </div>
+
+            <div class="course-card fade-in">
+                <div class="course-provider">Provider</div>
+                <div class="course-name">Course Name Here</div>
+                <div class="course-meta">Instructor · Duration</div>
+                <div class="course-badge wip">In Progress</div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ===================== CONTACT ===================== -->
+<section id="contact" style="background:var(--bg-surface)">
+    <div class="container">
+        <div class="fade-in">
+            <h2 class="section-title">Let's connect</h2>
+        </div>
+        <div class="contact-wrapper">
+            <div class="contact-left fade-in">
+                <p>
+                    Open to discussing <strong>ML research, AI projects, internship opportunities,
+                    collaborations, or just interesting ideas</strong>. My inbox is always open.
+                </p>
+                <div class="contact-links">
+                    <a href="mailto:virajsanghavi000@gmail.com" class="contact-link-item">
+                        <div class="contact-link-icon">✉</div>
+                        <div class="contact-link-text">
+                            <div class="contact-link-label">EMAIL</div>
+                            <div class="contact-link-value">virajsanghavi000@gmail.com</div>
+                        </div>
+                    </a>
+                    <a href="https://github.com/VirajSanghavi007" target="_blank" class="contact-link-item">
+                        <div class="contact-link-icon">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        </div>
+                        <div class="contact-link-text">
+                            <div class="contact-link-label">GITHUB</div>
+                            <div class="contact-link-value">github.com/VirajSanghavi007</div>
+                        </div>
+                    </a>
+                    <a href="https://linkedin.com/in/virajsanghavi" target="_blank" class="contact-link-item">
+                        <div class="contact-link-icon">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        </div>
+                        <div class="contact-link-text">
+                            <div class="contact-link-label">LINKEDIN</div>
+                            <div class="contact-link-value">linkedin.com/in/virajsanghavi</div>
+                        </div>
+                    </a>
+                    <a href="https://kaggle.com/virajsanghavi" target="_blank" class="contact-link-item">
+                        <div class="contact-link-icon">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18.825 23.859c-.022.092-.117.141-.281.141h-3.139c-.187 0-.351-.082-.492-.248l-5.178-6.589-1.448 1.374v5.111c0 .235-.117.352-.351.352H5.505c-.236 0-.354-.117-.354-.352V.353c0-.233.118-.353.354-.353h2.431c.234 0 .351.12.351.353v14.343l6.203-6.272c.165-.165.33-.246.495-.246h3.239c.144 0 .236.06.285.18.046.149.034.255-.036.315l-6.555 6.344 6.836 8.507c.095.104.117.208.07.334z"/></svg>
+                        </div>
+                        <div class="contact-link-text">
+                            <div class="contact-link-label">KAGGLE</div>
+                            <div class="contact-link-value">kaggle.com/virajsanghavi</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <form class="contact-form fade-in" onsubmit="handleFormSubmit(event)">
+                <div class="form-group">
+                    <label for="fname">NAME</label>
+                    <input type="text" id="fname" placeholder="Your name" required>
+                </div>
+                <div class="form-group">
+                    <label for="femail">EMAIL</label>
+                    <input type="email" id="femail" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="fmessage">MESSAGE</label>
+                    <textarea id="fmessage" placeholder="What's on your mind?" required></textarea>
+                </div>
+                <button type="submit" class="form-submit">Send Message</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+    <div class="container">
+        <p>Built by <span>Viraj Sanghavi</span> · 2026</p>
+        <p style="margin-top:8px; font-size:12px">Plain HTML, CSS, JS · no frameworks, no dependencies.</p>
+    </div>
+</footer>
+
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+    // Navbar: add frosted-glass blur when page is scrolled
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    // Scroll-triggered fade-in using IntersectionObserver
+    // Elements with class "fade-in" animate in when they enter the viewport
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+    document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+    // Typing animation for the hero tagline
+    // Cycles through phrases, types and deletes each one
+    const phrases = [
+        'ML / AI Engineer',
+        'Building in Finance, Logistics, Speech',
+        'Third Year CE at DJ Sanghavi',
+        'Deep Learning Practitioner',
+    ];
+    let pi = 0, ci = 0, deleting = false;
+    const typedEl = document.getElementById('typed-text');
+
+    (function type() {
+        const phrase = phrases[pi];
+        typedEl.textContent = deleting ? phrase.slice(0, --ci) : phrase.slice(0, ++ci);
+
+        if (!deleting && ci === phrase.length) {
+            setTimeout(() => { deleting = true; type(); }, 2200);
+            return;
+        }
+        if (deleting && ci === 0) {
+            deleting = false;
+            pi = (pi + 1) % phrases.length;
+        }
+        setTimeout(type, deleting ? 38 : 72);
+    })();
+
+    // Project writeup expand / collapse
+    // Only one writeup open at a time
+    function toggleWriteup(btn) {
+        const card    = btn.closest('.project-card');
+        const writeup = card.querySelector('.project-writeup');
+        const isOpen  = writeup.classList.contains('open');
+
+        document.querySelectorAll('.project-writeup.open').forEach(w => w.classList.remove('open'));
+        document.querySelectorAll('.writeup-toggle.open').forEach(b => b.classList.remove('open'));
+
+        if (!isOpen) {
+            writeup.classList.add('open');
+            btn.classList.add('open');
+            setTimeout(() => writeup.scrollIntoView({ behavior:'smooth', block:'nearest' }), 50);
+        }
+    }
+
+</script>
+
+<!-- EmailJS SDK — must load before contact.js -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="contact.js"></script>
+
+</body>
+</html>

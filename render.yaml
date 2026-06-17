@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: viraj-portofolio
+    env: static
+    buildCommand: ""
+    staticPublishPath: .
